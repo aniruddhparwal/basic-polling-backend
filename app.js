@@ -37,7 +37,9 @@ app.post('/vote', (req, res) => {
     console.log(name, vote, time);
     res.send("aaaa")
 
-    var sql = `INSERT INTO votes (id,name, voting_choice, casted_at ) VALUES (NULL,"${name}","${vote}","${time}")`;
+    var sql = `INSERT INTO votes (id,name, voting_choice, casted_at ) VALUES (NULL,"${name}","${vote}", "${time}" )`;
+    // var sql = `INSERT INTO votes (id,name, voting_choice, casted_at ) VALUES (NULL,"${name}","${vote}",STR_TO_DATE(${Date.parse(time)}, '%Y-%m-%d') )`;
+    // var sql = `INSERT INTO votes (id,name, voting_choice, casted_at ) VALUES (NULL,"${name}","${vote}",STR_TO_DATE("${time}", '%Y-%m-%d') )`;
     // INSERT INTO `votes` (`id`, `name`, `voting_choice`, `casted_at`) VALUES (NULL, 'Ani', '0', CURRENT_TIMESTAMP)
     con.query(sql, function (err, result) {
         if (err) throw err;
@@ -63,16 +65,49 @@ app.get('/data', (req, res) => {
 
 
 app.get('/counts', (req, res) => {
+    // con.connect(function (err) {
+    //     con.query(`SELECT * FROM votes where voting_choice = ${req.query.voting_choice == "true" ? 1 : 0}`, function (err, result, fields) {
+    //         if (err) throw err;
+    //         console.log(typeof (result));
+    //         res.send(result)
+
+    //     });
+    // });
+    console.log("choice api ", `SELECT count(voting_choice) as count, casted_at FROM votes where voting_choice = ${req.query.voting_choice == "true" ? "1" : "0"} group by casted_at`)
     con.connect(function (err) {
-        con.query(`SELECT * FROM votes where voting_choice = ${req.query.voting_choice == "true" ? 1 : 0}`, function (err, result, fields) {
+        con.query(`SELECT count(voting_choice) as count, casted_at FROM votes where voting_choice = ${req.query.voting_choice == "true" ? "1" : "0"} group by casted_at`, function (err, result, fields) {
             if (err) throw err;
             console.log(typeof (result));
             res.send(result)
 
         });
     });
+
+    // Select
+    //  count(created_date) as counted_leads,
+    //  created_date as count_date
+    // from
+    //  table
+    // group by
+    //  created_date
     // res.send("ani")
 })
+
+
+app.get('/results', (req, res) => {
+
+    console.log("choice api ", `SELECT count(voting_choice) as count, casted_at FROM votes where voting_choice = ${req.query.voting_choice == "true" ? "1" : "0"} group by casted_at`)
+    con.connect(function (err) {
+        con.query(`SELECT count(voting_choice) as count, voting_choice FROM votes group by voting_choice`, function (err, result, fields) {
+            if (err) throw err;
+            console.log(typeof (result));
+            res.send(result)
+
+        });
+    });
+})
+
+
 
 
 
